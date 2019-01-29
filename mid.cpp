@@ -16,9 +16,9 @@ string v0;
 string v1;
 string v2;
 string arrayname;
-int TableTop=0;						// ·ûºÅ±íÕ»¶¥Ö¸Õë
-int LVL=0;						    // ²ãºÅ
-int TableIndex[SYMTOP];				// ·Ö³ÌĞòË÷Òı±í
+int TableTop=0;						// ç¬¦å·è¡¨æ ˆé¡¶æŒ‡é’ˆ
+int LVL=0;						    // å±‚å·
+int TableIndex[SYMTOP];				// åˆ†ç¨‹åºç´¢å¼•è¡¨
 int Labeln=0;
 int Labelab=1;
 int Labelstr=0;
@@ -33,22 +33,23 @@ string newlabel;
 string whilestr;
 int defaultcount=-1;
 stack <string> defaultlabel;
+stack <string> whilelabel;
 string strlabel;
 vector<string> strlabelarr;
 int nvpara=0;
 int strcount=0;
-/*struct symTable{                    //·ûºÅ±í
-	string name;			        // Ãû×Ö
-	int type;						// ÀàĞÍ0 int 1 char
-	string kind;					// ÖÖÀà,³£Á¿¡¢±äÁ¿¡¢º¯Êı¡¢Êı×éµÈ
-	string val;					    // ³£Á¿µÄÖµ
-	int lev;						// ²ãºÅ
-	int range;						// Êı×é´óĞ¡¡¢·¶Î§
-	int offs;						//Æ«ÒÆÁ¿
+/*struct symTable{                    //ç¬¦å·è¡¨
+	string name;			        // åå­—
+	int type;						// ç±»å‹0 int 1 char
+	string kind;					// ç§ç±»,å¸¸é‡ã€å˜é‡ã€å‡½æ•°ã€æ•°ç»„ç­‰
+	string val;					    // å¸¸é‡çš„å€¼
+	int lev;						// å±‚å·
+	int range;						// æ•°ç»„å¤§å°ã€èŒƒå›´
+	int offs;						//åç§»é‡
 };*/
-symTable symtable[SYMTOP];		// ·ûºÅ±í
-string name;        //Ãû×Ö
-string val;         //³£Á¿µÄÖµ
+symTable symtable[SYMTOP];		// ç¬¦å·è¡¨
+string name;        //åå­—
+string val;         //å¸¸é‡çš„å€¼
 string sname;
 string leftterm;
 string rightterm;
@@ -66,11 +67,11 @@ void insert(string name2,string kind2,int type2,string value,int currange){
 	symtable[TableTop].lev=LVL;
 	symtable[TableTop].range=currange;
 	symtable[TableTop].val=value;
-	symtable[TableTop].offs=TableTop;//¼ÆËãÆ«ÒÆÁ¿
-	name=strlwr2(name);//²»Çø·Ö´óĞ¡Ğ´
+	symtable[TableTop].offs=TableTop;//è®¡ç®—åç§»é‡
+	name=strlwr2(name);//ä¸åŒºåˆ†å¤§å°å†™
 	symtable[TableTop].name=name2;
 	if(kind2=="array"){
-        addarr(currange,type2);//·ÖÅäÊı×é¿Õ¼ä
+        addarr(currange,type2);//åˆ†é…æ•°ç»„ç©ºé—´
 		TableTop--;
 	}
 	TableTop++;
@@ -139,7 +140,7 @@ string newvar(){
 	int i=0;
 	char *ch;
 	tmp[0]='$';tmp[1]='v';tmp[2]='a';tmp[3]='r';tmp[4]='n';
-	//itoa(Labeln,ch,10);//const char * Óë char *²»¼æÈİ
+	//itoa(Labeln,ch,10);//const char * ä¸ char *ä¸å…¼å®¹
     counter=to_string(Labeln);
 	for(i=0;i<counter.size();i++){
         tmp[i+5]=counter[i];
@@ -207,10 +208,10 @@ int insymtable(string str){
 int getarrange(string name2){
     int i;
     for(i=TableTop-1;i>=0;i--){
-        if(symtable[i].name==name2&&symtable[i].kind=="array"&&symtable[i].lev==LVL)return symtable[i].range;//¾Ö²¿Êı×é
+        if(symtable[i].name==name2&&symtable[i].kind=="array"&&symtable[i].lev==LVL)return symtable[i].range;//å±€éƒ¨æ•°ç»„
     }
     for(i=TableTop-1;i>=0;i--){
-        if(symtable[i].name==name2&&symtable[i].kind=="array"&&symtable[i].lev==0)return symtable[i].range;//È«¾ÖÊı×é
+        if(symtable[i].name==name2&&symtable[i].kind=="array"&&symtable[i].lev==0)return symtable[i].range;//å…¨å±€æ•°ç»„
     }
 }
 string newlab(){
@@ -224,7 +225,7 @@ string newlab(){
 	for(i=0;i<counter.size();i++){
         newlabel+=counter[i];
 	}
-	Labelab++;//±êÇ©¼Ó1
+	Labelab++;//æ ‡ç­¾åŠ 1
 	return newlabel;
 }
 string divzero(string str){
@@ -260,12 +261,12 @@ void read(){
     symbol2=resultvalue;
     v2=token;
 }
-//³ÌĞò¶¨Òå
+//ç¨‹åºå®šä¹‰
 void program(){
-    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö³ÌĞò¡£\n");
-    printf("ÕâÊÇÒ»¸ö³ÌĞò¡£\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªç¨‹åºã€‚\n");
+    printf("è¿™æ˜¯ä¸€ä¸ªç¨‹åºã€‚\n");
     if (symbol0 == CONSTSY){
-		con_dcl(); //µ÷ÓÃ³£Á¿·ÖÎöº¯Êı
+		con_dcl(); //è°ƒç”¨å¸¸é‡åˆ†æå‡½æ•°
 	}
     if ((symbol0 == CHARSY || symbol0 == INTSY) && symbol1 == IDSY&&symbol2 != LPARSY&&symbol2!=LBRACESY){
 		var_dcl();
@@ -285,12 +286,12 @@ void program(){
 		read();
 	}
 }
-void con_dcl(){//³£Á¿ËµÃ÷
+void con_dcl(){//å¸¸é‡è¯´æ˜
 	read();
 	con_def();
 	if (symbol0 == SEMISY){
-        fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö³£Á¿·ÖÎöÓï¾ä¡£\n");
-		printf("³£Á¿·ÖÎöÓï¾ä\n");
+        fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå¸¸é‡åˆ†æè¯­å¥ã€‚\n");
+		printf("å¸¸é‡åˆ†æè¯­å¥\n");
 		read();
 	}
 	else
@@ -299,8 +300,8 @@ void con_dcl(){//³£Á¿ËµÃ÷
 		read();
 		con_def();
 		if (symbol0 == SEMISY){
-            fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö³£Á¿·ÖÎöÓï¾ä¡£\n");
-			printf("³£Á¿·ÖÎöÓï¾ä\n");
+            fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå¸¸é‡åˆ†æè¯­å¥ã€‚\n");
+			printf("å¸¸é‡åˆ†æè¯­å¥\n");
 			read();
 		}
 		else
@@ -315,7 +316,7 @@ void con_def(){
             name=strlwr2(v0);
             val=v2;
 			read(); read(); read();
-			insert(name,"const",1,val,-1);//·Çº¯Êı·¶Î§ÊÇ-1
+			insert(name,"const",1,val,-1);//éå‡½æ•°èŒƒå›´æ˜¯-1
 			fprintf(output_midcoder_pointer,"const %s char %s\n",name.c_str(),val.c_str());
 			while (symbol0 == COMMASY&&symbol1==IDSY&&symbol2==ISSY){
                 name=strlwr2(v1);
@@ -337,7 +338,7 @@ void con_def(){
 		if (symbol0 == IDSY&&symbol1 == ISSY){
             name=strlwr2(v0);
 			read(); read();
-			integer();//Òª¿¼ÂÇ´øÓĞ¡À·ûºÅµÄÇé¿ö
+			integer();//è¦è€ƒè™‘å¸¦æœ‰Â±ç¬¦å·çš„æƒ…å†µ
 			insert(name,"const",0,val,-1);
 			fprintf(output_midcoder_pointer,"const %s int %s\n",name.c_str(),val.c_str());
 			while (symbol0 == COMMASY&&symbol1 == IDSY&&symbol2==ISSY){
@@ -353,14 +354,14 @@ void con_def(){
 	}
 	else
 		error(9);
-    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö³£Á¿¶¨ÒåÓï¾ä\n");
-	printf("³£Á¿¶¨ÒåÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå¸¸é‡å®šä¹‰è¯­å¥\n");
+	printf("å¸¸é‡å®šä¹‰è¯­å¥\n");
 }
-void integer(){//´¦Àí¡À·ûºÅµÄÇé¿ö
+void integer(){//å¤„ç†Â±ç¬¦å·çš„æƒ…å†µ
 	if (symbol0 == PLUSSY || symbol0 == MINUSSY){
 		if(symbol0==PLUSSY){
             read();
-            if (symbol0 == INTCON){//ÎŞ·ûºÅÕûÊı
+            if (symbol0 == INTCON){//æ— ç¬¦å·æ•´æ•°
                 val=v0;
                 read();
             }
@@ -378,7 +379,7 @@ void integer(){//´¦Àí¡À·ûºÅµÄÇé¿ö
 		}
 	}
 	else if (symbol0 == INTCON){
-        val=divzero(v0);//È¥Ç°µ¼0
+        val=divzero(v0);//å»å‰å¯¼0
         read();
 	}
     else
@@ -388,8 +389,8 @@ void var_dcl(){
 	var_def();
 	if (symbol0 == SEMISY){
         read();
-        fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö±äÁ¿ËµÃ÷Óï¾ä\n");
-        printf("±äÁ¿ËµÃ÷Óï¾ä\n");
+        fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå˜é‡è¯´æ˜è¯­å¥\n");
+        printf("å˜é‡è¯´æ˜è¯­å¥\n");
     }
 	else
 		error(11);
@@ -398,8 +399,8 @@ void var_dcl(){
 		var_def();
 		if (symbol0 == SEMISY){
             read();
-            fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö±äÁ¿ËµÃ÷Óï¾ä\n");
-            printf("±äÁ¿ËµÃ÷Óï¾ä\n");
+            fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå˜é‡è¯´æ˜è¯­å¥\n");
+            printf("å˜é‡è¯´æ˜è¯­å¥\n");
         }
 		else
 			error(11);
@@ -409,24 +410,24 @@ void var_def(){
     int num=0;
 	if (symbol0 == INTSY){
 		read();
-		if (symbol0 == IDSY&&symbol1 != LBRACKETSY){//·ÇÊı×é
+		if (symbol0 == IDSY&&symbol1 != LBRACKETSY){//éæ•°ç»„
             name=strlwr2(v0);
-            insert(name,"var",0,"",-1);//valÎª¿Õ
+            insert(name,"var",0,"",-1);//valä¸ºç©º
 			fprintf(output_midcoder_pointer,"var int %s\n",name.c_str());
 			read();
-			fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öint±äÁ¿¶¨Òå\n");
-			printf("int±äÁ¿¶¨Òå\n");
+			fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªintå˜é‡å®šä¹‰\n");
+			printf("intå˜é‡å®šä¹‰\n");
 		}
-		else if (symbol0 == IDSY&&symbol1 == LBRACKETSY&&symbol2 == INTCON){//Êı×é
+		else if (symbol0 == IDSY&&symbol1 == LBRACKETSY&&symbol2 == INTCON){//æ•°ç»„
 		    name=strlwr2(v0);
 		    val=v2;
 		    num=atoi(val.c_str());
-		    insert(name,"array",0,"",num);//numÊÇsize
+		    insert(name,"array",0,"",num);//numæ˜¯size
 		    fprintf(output_midcoder_pointer,"array int %s %s\n",name.c_str(),val.c_str());
 			read(); read(); read();
 			if (symbol0 == RBRACKETSY){
-                fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öintÊı×é±äÁ¿¶¨Òå\n");
-				printf("intÊı×é±äÁ¿¶¨Òå\n");
+                fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªintæ•°ç»„å˜é‡å®šä¹‰\n");
+				printf("intæ•°ç»„å˜é‡å®šä¹‰\n");
 				read();
 			}
 			else
@@ -441,20 +442,20 @@ void var_def(){
                 insert(name,"var",0,"",-1);
                 fprintf(output_midcoder_pointer,"var int %s\n",name.c_str());
 				read();
-				fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öint±äÁ¿¶¨Òå\n");
-				printf("int±äÁ¿¶¨Òå\n");
+				fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªintå˜é‡å®šä¹‰\n");
+				printf("intå˜é‡å®šä¹‰\n");
 			}
 			else if (symbol0 == IDSY&&symbol1 == LBRACKETSY&&symbol2 == INTCON){
 			    name=strlwr2(v0);
 			    //cout<<"v2 is ********"<<v2<<endl;
 			    val=divzero(v2);
-			    num=atoi(val.c_str());//Ç°µ¼0
+			    num=atoi(val.c_str());//å‰å¯¼0
                 insert(name,"array",0,"",num);
                 fprintf(output_midcoder_pointer,"array int %s %s\n",name.c_str(),val.c_str());
 				read(); read(); read();
 				if (symbol0 == RBRACKETSY){
-					fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öintÊı×é±äÁ¿¶¨Òå\n");
-                    printf("intÊı×é±äÁ¿¶¨Òå\n");
+					fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªintæ•°ç»„å˜é‡å®šä¹‰\n");
+                    printf("intæ•°ç»„å˜é‡å®šä¹‰\n");
 					read();
 				}
 				else
@@ -466,13 +467,13 @@ void var_def(){
     }
 	else if (symbol0 == CHARSY){
 		read();
-		if (symbol0 == IDSY&&symbol1 != LBRACKETSY){//·ÇÊı×é
+		if (symbol0 == IDSY&&symbol1 != LBRACKETSY){//éæ•°ç»„
             name=strlwr2(v0);
             insert(name,"var",1,"",-1);
             fprintf(output_midcoder_pointer,"var char %s\n",name.c_str());
 			read();
-			fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öchar±äÁ¿¶¨Òå\n");
-			printf("char±äÁ¿¶¨Òå\n");
+			fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªcharå˜é‡å®šä¹‰\n");
+			printf("charå˜é‡å®šä¹‰\n");
 		}
 		else if (symbol0 == IDSY&&symbol1 == LBRACKETSY&&symbol2 == INTCON){
             name=strlwr2(v0);
@@ -482,8 +483,8 @@ void var_def(){
             fprintf(output_midcoder_pointer,"array char %s %s\n",name.c_str(),val.c_str());
 			read(); read(); read();
 			if (symbol0 == RBRACKETSY){
-                fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öcharÊı×é±äÁ¿¶¨Òå\n");
-				printf("charÊı×é±äÁ¿¶¨Òå\n");
+                fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªcharæ•°ç»„å˜é‡å®šä¹‰\n");
+				printf("charæ•°ç»„å˜é‡å®šä¹‰\n");
 				read();
 			}
 			else
@@ -498,8 +499,8 @@ void var_def(){
                 insert(name,"var",1,"",-1);
                 fprintf(output_midcoder_pointer,"var char %s\n",name.c_str());
 				read();
-				fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öchar±äÁ¿¶¨Òå\n");
-				printf("char±äÁ¿¶¨Òå\n");
+				fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªcharå˜é‡å®šä¹‰\n");
+				printf("charå˜é‡å®šä¹‰\n");
 			}
 			else if (symbol0 == IDSY&&symbol1 == LBRACKETSY&&symbol2 == INTCON){
                 name=strlwr2(v0);
@@ -509,8 +510,8 @@ void var_def(){
                 fprintf(output_midcoder_pointer,"array char %s %s\n",name.c_str(),val.c_str());
 				read(); read(); read();
 				if (symbol0 == RBRACKETSY){
-                    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öcharÊı×é±äÁ¿¶¨Òå\n");
-					printf("charÊı×é±äÁ¿¶¨Òå\n");
+                    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªcharæ•°ç»„å˜é‡å®šä¹‰\n");
+					printf("charæ•°ç»„å˜é‡å®šä¹‰\n");
 					read();
 				}
 				else
@@ -523,9 +524,9 @@ void var_def(){
 	else
 		error(13);
 }
-void r_func_def(){//£¼ÓĞ·µ»ØÖµº¯Êı¶¨Òå£¾ ::= £¼ÉùÃ÷Í·²¿£¾¡®(¡¯£¼²ÎÊı±í£¾¡®)¡¯ ¡®{¡¯£¼¸´ºÏÓï¾ä£¾¡®}¡¯|£¼ÉùÃ÷Í·²¿£¾¡®{¡¯£¼¸´ºÏÓï¾ä£¾¡®}¡¯  //µÚÒ»ÖÖÑ¡ÔñÎªÓĞ²ÎÊıµÄÇé¿ö£¬µÚ¶şÖÖÑ¡ÔñÎªÎŞ²ÎÊıµÄÇé¿ö
-	fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öÓĞ·µ»ØÖµº¯Êı¶¨Òå\n");
-    printf("ÓĞ·µ»ØÖµº¯Êı¶¨Òå\n");
+void r_func_def(){//ï¼œæœ‰è¿”å›å€¼å‡½æ•°å®šä¹‰ï¼ ::= ï¼œå£°æ˜å¤´éƒ¨ï¼â€˜(â€™ï¼œå‚æ•°è¡¨ï¼â€˜)â€™ â€˜{â€™ï¼œå¤åˆè¯­å¥ï¼â€˜}â€™|ï¼œå£°æ˜å¤´éƒ¨ï¼â€˜{â€™ï¼œå¤åˆè¯­å¥ï¼â€˜}â€™  //ç¬¬ä¸€ç§é€‰æ‹©ä¸ºæœ‰å‚æ•°çš„æƒ…å†µï¼Œç¬¬äºŒç§é€‰æ‹©ä¸ºæ— å‚æ•°çš„æƒ…å†µ
+	fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªæœ‰è¿”å›å€¼å‡½æ•°å®šä¹‰\n");
+    printf("æœ‰è¿”å›å€¼å‡½æ•°å®šä¹‰\n");
     string str;
 	head_statement();
 	str=name;
@@ -536,7 +537,7 @@ void r_func_def(){//£¼ÓĞ·µ»ØÖµº¯Êı¶¨Òå£¾ ::= £¼ÉùÃ÷Í·²¿£¾¡®(¡¯£¼²ÎÊı±í£¾¡®)¡¯ ¡®
 		if (symbol0 != RPARSY){ error(14); }
 		read();
 	}
-    if (symbol0 == LBRACESY&&symbol1 == SEMISY&&symbol2==RBRACESY){ //¿ÕÓï¾ä±¨´í
+    if (symbol0 == LBRACESY&&symbol1 == SEMISY&&symbol2==RBRACESY){ //ç©ºè¯­å¥æŠ¥é”™
             read();
             read();
             if (symbol0 != RBRACESY){
@@ -545,13 +546,13 @@ void r_func_def(){//£¼ÓĞ·µ»ØÖµº¯Êı¶¨Òå£¾ ::= £¼ÉùÃ÷Í·²¿£¾¡®(¡¯£¼²ÎÊı±í£¾¡®)¡¯ ¡®
 		    read();
 		    error(44);
     }
-	else if (symbol0 == LBRACESY){//·Ç¿ÕÓï¾ä
+	else if (symbol0 == LBRACESY){//éç©ºè¯­å¥
 		read();
-		comstatement();//¸´ºÏÓï¾ä
+		comstatement();//å¤åˆè¯­å¥
 		if(returnflag==false)
             error(39);
-        fprintf(output_midcoder_pointer,"END %s\n",str.c_str());//º¯Êı½áÊø
-        returnflag=false;//ÖØÖÃ£¬·ñÔòÒ»Ö±ÎªÕæ£¬´æÔÚbug
+        fprintf(output_midcoder_pointer,"END %s\n",str.c_str());//å‡½æ•°ç»“æŸ
+        returnflag=false;//é‡ç½®ï¼Œå¦åˆ™ä¸€ç›´ä¸ºçœŸï¼Œå­˜åœ¨bug
 		if (symbol0 != RBRACESY){
 			error(15);
 		}
@@ -559,11 +560,11 @@ void r_func_def(){//£¼ÓĞ·µ»ØÖµº¯Êı¶¨Òå£¾ ::= £¼ÉùÃ÷Í·²¿£¾¡®(¡¯£¼²ÎÊı±í£¾¡®)¡¯ ¡®
 	}
 	else
 		error(17);
-    funcsize(str);//¼ÆËãº¯Êı´óĞ¡
+    funcsize(str);//è®¡ç®—å‡½æ•°å¤§å°
 }
 void head_statement(){
-    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸öÉùÃ÷Í·²¿\n");
-    printf("ÉùÃ÷Í·²¿\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå£°æ˜å¤´éƒ¨\n");
+    printf("å£°æ˜å¤´éƒ¨\n");
 	if (symbol0 == INTSY || symbol0 == CHARSY){
         if(symbol0==INTSY){
             read();
@@ -587,9 +588,9 @@ void head_statement(){
 		error(18);
     read();
 }
-void paratable(){//²ÎÊı±í
-    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö²ÎÊı±í\n");
-    printf("²ÎÊı±í\n");
+void paratable(){//å‚æ•°è¡¨
+    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå‚æ•°è¡¨\n");
+    printf("å‚æ•°è¡¨\n");
     int flag=0;
     string str;
 	if (symbol0 == INTSY || symbol0 == CHARSY){
@@ -600,7 +601,7 @@ void paratable(){//²ÎÊı±í
 		name=strlwr2(v0);
 		insert(name,"parameter",flag,"",-1);
 		fprintf(output_midcoder_pointer,"parameter %s %s\n",str.c_str(),name.c_str());
-		read();/////////////////////////////////////////ºó¼ÓÁËread()
+		read();/////////////////////////////////////////ååŠ äº†read()
 		while (symbol0 == COMMASY){
 			read();
 			if (symbol0 == INTSY || symbol0 == CHARSY){
@@ -620,14 +621,14 @@ void paratable(){//²ÎÊı±í
 	else
 		error(19);
 }
-void comstatement(){//¸´ºÏÓï¾ä    Âß¼­ÓĞ´íÎó   £¼¸´ºÏÓï¾ä£¾   ::=  £Û£¼³£Á¿ËµÃ÷£¾£İ£Û£¼±äÁ¿ËµÃ÷£¾£İ£¼Óï¾äÁĞ£¾
-    fprintf(output_grammar_pointer,"ÕâÊÇÒ»¸ö¸´ºÏÓï¾ä\n");
-    printf("¸´ºÏÓï¾ä\n");
+void comstatement(){//å¤åˆè¯­å¥    é€»è¾‘æœ‰é”™è¯¯   ï¼œå¤åˆè¯­å¥ï¼   ::=  ï¼»ï¼œå¸¸é‡è¯´æ˜ï¼ï¼½ï¼»ï¼œå˜é‡è¯´æ˜ï¼ï¼½ï¼œè¯­å¥åˆ—ï¼
+    fprintf(output_grammar_pointer,"è¿™æ˜¯ä¸€ä¸ªå¤åˆè¯­å¥\n");
+    printf("å¤åˆè¯­å¥\n");
 	if (symbol0 == CONSTSY){ con_dcl(); }
     if (symbol0 == CHARSY || symbol0 == INTSY){
 		var_dcl();
 	}
-	statementlist(); //Óï¾äÁĞ
+	statementlist(); //è¯­å¥åˆ—
 }
 void statementlist(){
 	while (symbol0==IFSY||symbol0==DOSY||symbol0==SWITCHSY||symbol0==LBRACESY||(symbol0==IDSY&&(symbol1!=ISSY&&symbol1!=LPARSY))
@@ -639,7 +640,7 @@ void statement(){
     string str;
     string name;
     int type=0;
-    if (symbol0 == IDSY&&symbol1 == LPARSY){//ĞèÒªÒıÈë·ûºÅ±í
+    if (symbol0 == IDSY&&symbol1 == LPARSY){//éœ€è¦å¼•å…¥ç¬¦å·è¡¨
 		Rfcallstate(name,&type);
 		if (symbol0 == SEMISY){ read(); }
 		else { error(20); }
@@ -648,18 +649,19 @@ void statement(){
 		Rfcallstate(name,&type);
 		if (symbol0 == SEMISY){ read(); }
 		else { error(20); }
-	}//ÎŞ·µ»ØÖµº¯Êıµ÷ÓÃÃ»Ğ´£»
+	}//æ— è¿”å›å€¼å‡½æ•°è°ƒç”¨æ²¡å†™ï¼›
 	else if (symbol0 == IFSY){ read();ifstate(); }
 	else if (symbol0 == DOSY){
         newlab();
         whilestr=newlabel;
+        whilelabel.push(whilestr);
         fprintf(output_midcoder_pointer,"LABEL %s\n",whilestr.c_str());
         read();
         whilestate();//do{}while()  ;
     }
 	else if (symbol0 == SWITCHSY){ read();switchstate(); }
 	else if (symbol0 == LBRACESY){
-        cout<<"********Óï¾äÁĞ!*******"<<endl;
+        cout<<"********è¯­å¥åˆ—!*******"<<endl;
 		read();
         //cout<<"string is:***********"<<v0<<" "<<v1<<" "<<v2<<" "<<token<<" "<<ch<<endl;//mark [ i
         //cout<<symbol0<<" "<<symbol1<<" "<<symbol2<<endl;//8:id 34:[ 8:id
@@ -691,8 +693,8 @@ void statement(){
 	else{ error(21); }
 }
 void v_func_def(){
-    fprintf(output_grammar_pointer,"ÎŞ·µ»ØÖµº¯Êı¶¨Òå\n");
-    printf("ÎŞ·µ»ØÖµº¯Êı¶¨Òå\n");
+    fprintf(output_grammar_pointer,"æ— è¿”å›å€¼å‡½æ•°å®šä¹‰\n");
+    printf("æ— è¿”å›å€¼å‡½æ•°å®šä¹‰\n");
     string str;
 	if (symbol0 == VOIDSY&&symbol1 == IDSY){
         name=strlwr2(v1);
@@ -708,8 +710,8 @@ void v_func_def(){
 			read();
             if (symbol0 == LBRACESY&&symbol1 == SEMISY&&symbol2==RBRACESY){
                     read(); read();read();
-                    printf("¶¨ÒåÁË¿ÕÓï¾äµÄ´øÓĞ²ÎÊıµÄÎŞ·µ»ØÖµº¯Êı!\n");
-                    fprintf(output_error,"¶¨ÒåÁË¿ÕÓï¾äµÄ´øÓĞ²ÎÊıµÄÎŞ·µ»ØÖµº¯Êı!\n");
+                    printf("å®šä¹‰äº†ç©ºè¯­å¥çš„å¸¦æœ‰å‚æ•°çš„æ— è¿”å›å€¼å‡½æ•°!\n");
+                    fprintf(output_error,"å®šä¹‰äº†ç©ºè¯­å¥çš„å¸¦æœ‰å‚æ•°çš„æ— è¿”å›å€¼å‡½æ•°!\n");
             }
             else if (symbol0 == LBRACESY){
                 read();
@@ -726,8 +728,8 @@ void v_func_def(){
                 read();
                 if (symbol0 != RBRACESY){ error(36); }
                 read();
-                printf("¶¨ÒåÁË¿ÕÓï¾äµÄÎŞ·µ»ØÖµº¯Êı!\n");
-                fprintf(output_error,"¶¨ÒåÁË¿ÕÓï¾äµÄÎŞ·µ»ØÖµº¯Êı!\n");
+                printf("å®šä¹‰äº†ç©ºè¯­å¥çš„æ— è¿”å›å€¼å‡½æ•°!\n");
+                fprintf(output_error,"å®šä¹‰äº†ç©ºè¯­å¥çš„æ— è¿”å›å€¼å‡½æ•°!\n");
         }
 		else if (symbol0 == LBRACESY){
 			read();
@@ -744,9 +746,9 @@ void v_func_def(){
     funcsize(str);
 }
 void maindef(){
-    fprintf(output_grammar_pointer,"Ö÷º¯Êı¶¨Òå\n");
-    printf("Ö÷º¯Êı\n");
-    mainflag=true;//Ö»ÓĞÒ»¸öÖ÷º¯ÊıÔÚ×îºóÉùÃ÷Ê±²»ĞèÒªÖØÖÃflag£¬µ«ÊÇÏÈÉùÃ÷Ö÷º¯Êı²»·ûºÏÎÄ·¨£¬×ÛÉÏ²»ĞèÒªÖØÖÃ¸Ã±äÁ¿¡£
+    fprintf(output_grammar_pointer,"ä¸»å‡½æ•°å®šä¹‰\n");
+    printf("ä¸»å‡½æ•°\n");
+    mainflag=true;//åªæœ‰ä¸€ä¸ªä¸»å‡½æ•°åœ¨æœ€åå£°æ˜æ—¶ä¸éœ€è¦é‡ç½®flagï¼Œä½†æ˜¯å…ˆå£°æ˜ä¸»å‡½æ•°ä¸ç¬¦åˆæ–‡æ³•ï¼Œç»¼ä¸Šä¸éœ€è¦é‡ç½®è¯¥å˜é‡ã€‚
 	if (symbol0 == VOIDSY&&symbol1 == MAINSY){
         insert("main","func",2,"",-1);//2:void
         fprintf(output_midcoder_pointer,"func void main\n");
@@ -764,14 +766,14 @@ void maindef(){
 }
 void exp(string &expn,int *expt){
     string termname1;
-    string termname2;//×óÖµ ÓÒÖµ
+    string termname2;//å·¦å€¼ å³å€¼
 	int termt1,termt2;
 	int flag=1;
 	string str;
 	expprintflag=false;
-    fprintf(output_grammar_pointer,"±í´ïÊ½\n");
-    printf("±í´ïÊ½\n");
-	if (symbol0 == PLUSSY || symbol0 == MINUSSY){//Ğ´Óï¾äÖĞ£¬×Ö·û´®Ô­ÑùÊä³ö£¬µ¥¸ö×Ö·ûÀàĞÍµÄ±äÁ¿»ò³£Á¿Êä³ö×Ö·û£¬ÆäËû±í´ïÊ½°´ÕûĞÍÊä³ö
+    fprintf(output_grammar_pointer,"è¡¨è¾¾å¼\n");
+    printf("è¡¨è¾¾å¼\n");
+	if (symbol0 == PLUSSY || symbol0 == MINUSSY){//å†™è¯­å¥ä¸­ï¼Œå­—ç¬¦ä¸²åŸæ ·è¾“å‡ºï¼Œå•ä¸ªå­—ç¬¦ç±»å‹çš„å˜é‡æˆ–å¸¸é‡è¾“å‡ºå­—ç¬¦ï¼Œå…¶ä»–è¡¨è¾¾å¼æŒ‰æ•´å‹è¾“å‡º
             expprintflag=true;
             if (symbol0==MINUSSY) {
                 flag=-1;
@@ -804,8 +806,8 @@ void term(string &termn,int *termt){
 	int factor1=0,factor2=0;
 	string str;
 	//string leftname;
-    fprintf(output_grammar_pointer,"Ïî\n");
-    printf("Ïî\n");
+    fprintf(output_grammar_pointer,"é¡¹\n");
+    printf("é¡¹\n");
 	factor(factorname1,&factor1);
 	leftname=sname;
 	//cout<<"xiang factor"<<factorname1<<endl;//$var0
@@ -825,7 +827,7 @@ void term(string &termn,int *termt){
 	//cout<<"term"<<termn<<endl;
 	*termt=factor1;
 }
-void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®[¡¯£¼±í´ïÊ½£¾¡®]¡¯£ü£¼ÕûÊı£¾|£¼×Ö·û£¾£ü£¼ÓĞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä£¾|¡®(¡¯£¼±í´ïÊ½£¾¡®)¡¯
+void factor(string &factorn,int *factort){//ï¼œå› å­ï¼::= ï¼œæ ‡è¯†ç¬¦ï¼ï½œï¼œæ ‡è¯†ç¬¦ï¼â€˜[â€™ï¼œè¡¨è¾¾å¼ï¼â€˜]â€™ï½œï¼œæ•´æ•°ï¼|ï¼œå­—ç¬¦ï¼ï½œï¼œæœ‰è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥ï¼|â€˜(â€™ï¼œè¡¨è¾¾å¼ï¼â€˜)â€™
 	string varname;
 	string str;
 	int type;
@@ -834,31 +836,31 @@ void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®
 	int arrayedge;
 	int exptype=0;
 	int n=0;
-    if (symbol0 == IDSY&&symbol1 != LBRACKETSY&&symbol1 != LPARSY){//±êÊ¶·ûÒ²¿ÉÒÔÊÇµ÷ÓÃº¯Êı
+    if (symbol0 == IDSY&&symbol1 != LBRACKETSY&&symbol1 != LPARSY){//æ ‡è¯†ç¬¦ä¹Ÿå¯ä»¥æ˜¯è°ƒç”¨å‡½æ•°
         if(insymtable(strlwr2(v0))==0)//fprintf(output_midcoder_pointer,"JUMP %s\n",str.c_str());
-           error(40);//Î´¶¨Òå±êÊ¶·û
+           error(40);//æœªå®šä¹‰æ ‡è¯†ç¬¦
         varname=newvar();             //fprintf(output_midcoder_pointer,"LODR %s $v0\n",name.c_str())
-        factorn=varname;//string -> char * insert(s,"call",*type,"",-2);//µ÷ÓÃÀàĞÍ
-        if(getfunctype(v0)==-1){//²»ÊÇº¯Êıµ÷ÓÃ
+        factorn=varname;//string -> char * insert(s,"call",*type,"",-2);//è°ƒç”¨ç±»å‹
+        if(getfunctype(v0)==-1){//ä¸æ˜¯å‡½æ•°è°ƒç”¨
             type=gettype(strlwr2(v0));
             *factort=type;
             sname=varname;
             insert(varname,"newvar",type,"",-1);
-            fprintf(output_midcoder_pointer,"LODV %s %s %d\n",varname.c_str(),strlwr2(v0).c_str(),LVL);//¼ÓÔØ±äÁ¿
+            fprintf(output_midcoder_pointer,"LODV %s %s %d\n",varname.c_str(),strlwr2(v0).c_str(),LVL);//åŠ è½½å˜é‡
         }
         else{
             type=getfunctype(v0);
-            insert(varname,"call",type,"",-2);//µ÷ÓÃÀàĞÍ
-            fprintf(output_midcoder_pointer,"JUMP %s\n",strlwr2(v0).c_str());//±êÊ¶·û²»Çø·Ö´óĞ´Ğ¡Ğ´£¬Ó¦¸Ã»¯ÎªĞ¡Ğ´
+            insert(varname,"call",type,"",-2);//è°ƒç”¨ç±»å‹
+            fprintf(output_midcoder_pointer,"JUMP %s\n",strlwr2(v0).c_str());//æ ‡è¯†ç¬¦ä¸åŒºåˆ†å¤§å†™å°å†™ï¼Œåº”è¯¥åŒ–ä¸ºå°å†™
             fprintf(output_midcoder_pointer,"LODR %s $v0\n",varname.c_str());
         }
 		read();
-        printf("Òò×Ó±êÊ¶·û\n");
+        printf("å› å­æ ‡è¯†ç¬¦\n");
 	}
 	else if (symbol0 == IDSY&&symbol1 == LBRACKETSY){
         arrayname=strlwr2(v0);
         if(insymtable(strlwr2(v0))==0)
-            error(40);//Î´¶¨Òå±êÊ¶·û
+            error(40);//æœªå®šä¹‰æ ‡è¯†ç¬¦
         //varname=strlwr2(v0);
         type=gettype(strlwr2(v0));
         strv0=strlwr2(v0);
@@ -873,12 +875,12 @@ void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®
 		arrayflag=false;
 		insert(str,"newvar",type,"",-1);
 		fprintf(output_midcoder_pointer,"LODA %s %s %s %d\n",strv0.c_str(),expname.c_str(),factorn.c_str(),LVL);
-		if (symbol0 == RBRACKETSY){ read(); printf("Òò×Ó: £¼±êÊ¶·û£¾[£¼±í´ïÊ½£¾]\n"); }
+		if (symbol0 == RBRACKETSY){ read(); printf("å› å­: ï¼œæ ‡è¯†ç¬¦ï¼[ï¼œè¡¨è¾¾å¼ï¼]\n"); }
 		else { error(28); }
 	}
 	else if (symbol0 == LPARSY){
 		read(); exp(factorn,factort);
-		if (symbol0 == RPARSY){ read(); printf("Òò×Ó: (£¼±í´ïÊ½£¾) \n"); }
+		if (symbol0 == RPARSY){ read(); printf("å› å­: (ï¼œè¡¨è¾¾å¼ï¼) \n"); }
 		else { error(28); }
 	}
 	else if (symbol0 == PLUSSY || symbol0 == MINUSSY || symbol0 == INTCON){//i=0;
@@ -898,7 +900,7 @@ void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®
 		}
 		minusarray=false;
 		varname=newvar();
-		factorn=varname;//Éú³É¼Ä´æÆ÷±äÁ¿
+		factorn=varname;//ç”Ÿæˆå¯„å­˜å™¨å˜é‡
 		//str=*factorn;
 		sname=varname;
 		types=0;
@@ -907,7 +909,7 @@ void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®
 		insert(varname.c_str(),"newvar",0,"",-1);
 		//printftable();
 		fprintf(output_midcoder_pointer,"LODI %s %s\n",factorn.c_str(),val.c_str());
-		printf("Òò×Ó  ÕûÊı \n");
+		printf("å› å­  æ•´æ•° \n");
 	}
 	else if (symbol0 == CHARCON){
         varname=newvar();
@@ -918,16 +920,16 @@ void factor(string &factorn,int *factort){//£¼Òò×Ó£¾::= £¼±êÊ¶·û£¾£ü£¼±êÊ¶·û£¾¡®
 		insert(varname.c_str(),"newvar",1,"",-1);
 		fprintf(output_midcoder_pointer,"LODC %s %s\n",factorn.c_str(),v0.c_str());
         read();
-        printf("Òò×Ó: ×Ö·û \n");
+        printf("å› å­: å­—ç¬¦ \n");
     }
 	else if (symbol0 == IDSY&&symbol1 == LPARSY){
-		Rfcallstate(factorn,factort); printf("Òò×ÓÓĞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä \n");
+		Rfcallstate(factorn,factort); printf("å› å­æœ‰è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥ \n");
 	}
 	else { error(27); }
 }
-void asstate(){//¸³ÖµÓï¾ä
-    fprintf(output_grammar_pointer,"¸³ÖµÓï¾ä\n");
-    printf("¸³ÖµÓï¾ä\n");
+void asstate(){//èµ‹å€¼è¯­å¥
+    fprintf(output_grammar_pointer,"èµ‹å€¼è¯­å¥\n");
+    printf("èµ‹å€¼è¯­å¥\n");
     string expnameleft;
 	string expnameright;
 	int exptype=0;
@@ -937,10 +939,10 @@ void asstate(){//¸³ÖµÓï¾ä
         str=strlwr2(v0);
         if(insymtable(str)==0)error(40);
 		read(); read();
-        exp(expnameleft,&exptype);//µ÷ÓÃ±í´ïÊ½Éú³É$varn    i=i*i+i
-        fprintf(output_midcoder_pointer,"= %s %s %d\n",expnameleft.c_str(),str.c_str(),LVL);//str.c_str()=expnameleft snameÈ«¾Ö±äÁ¿»á¸üĞÂ
+        exp(expnameleft,&exptype);//è°ƒç”¨è¡¨è¾¾å¼ç”Ÿæˆ$varn    i=i*i+i
+        fprintf(output_midcoder_pointer,"= %s %s %d\n",expnameleft.c_str(),str.c_str(),LVL);//str.c_str()=expnameleft snameå…¨å±€å˜é‡ä¼šæ›´æ–°
 	}
-	else if (symbol0 == IDSY&&symbol1 == LBRACKETSY){//Êı×é¸³Öµ
+	else if (symbol0 == IDSY&&symbol1 == LBRACKETSY){//æ•°ç»„èµ‹å€¼
         str=strlwr2(v0);
         arrayname=str;
         if(insymtable(str)==0)error(40);
@@ -957,11 +959,11 @@ void asstate(){//¸³ÖµÓï¾ä
 	}
 	else{ error(29); }
 }
-void ifstate(){//ÉèÖÃ±êÇ©label
+void ifstate(){//è®¾ç½®æ ‡ç­¾label
     string str;
     string elsestr;
-    fprintf(output_grammar_pointer,"ifÓï¾ä\n");
-    printf("ifÓï¾ä\n");
+    fprintf(output_grammar_pointer,"ifè¯­å¥\n");
+    printf("ifè¯­å¥\n");
 	if (symbol0 == LPARSY){
         newlab();
 		str=newlabel;
@@ -974,7 +976,7 @@ void ifstate(){//ÉèÖÃ±êÇ©label
 			//cout<<"string is:***********"<<v0<<" "<<v1<<" "<<v2<<" "<<token<<" "<<ch<<endl;
 			statement();//////////bug if (){if(i==2)i=3;else i=4;}else
 			fprintf(output_midcoder_pointer,"JUMP %s\n",elsestr.c_str());
-            if(symbol0==ELSESY){//bug if() else ²»Ö´ĞĞ
+            if(symbol0==ELSESY){//bug if() else ä¸æ‰§è¡Œ
                 fprintf(output_midcoder_pointer,"LABEL %s\n",str.c_str());
                 read();
                 statement();
@@ -988,8 +990,8 @@ void ifstate(){//ÉèÖÃ±êÇ©label
 	else{ error(22); }
 }
 void condition(int flag,string label,string elsestr){
-    fprintf(output_grammar_pointer,"Ìõ¼ş\n");
-	printf("Ìõ¼ş\n");
+    fprintf(output_grammar_pointer,"æ¡ä»¶\n");
+	printf("æ¡ä»¶\n");
 	string expright;
 	string expleft;
 	string str;
@@ -1028,7 +1030,7 @@ void condition(int flag,string label,string elsestr){
             fprintf(output_midcoder_pointer,"== %s %s %s\n",expleft.c_str(),expright.c_str(),label.c_str());
         }
         else if(symbol0==EQUSY){//==
-            //printf("´òÓ¡³öÁË==£¡*****************\n");
+            //printf("æ‰“å°å‡ºäº†==ï¼*****************\n");
             read();
             exp(expright,&expt);
             fprintf(output_midcoder_pointer,"!= %s %s %s\n",expleft.c_str(),expright.c_str(),label.c_str());
@@ -1043,19 +1045,23 @@ void condition(int flag,string label,string elsestr){
             read();
             exp(expright,&expt);
             fprintf(output_midcoder_pointer,"%s %s %s %s\n",str.c_str(),expleft.c_str(),expright.c_str(),label.c_str());
-        }//while(0/i)µ¥¸ö±í´ïÊ½
+        }//while(0/i)å•ä¸ªè¡¨è¾¾å¼
         else{
             fprintf(output_midcoder_pointer,"!= %s 0 %s\n",expleft.c_str(),label.c_str());
         }
 	}
 }
 void whilestate(){
-        fprintf(output_grammar_pointer,"whileÑ­»·Óï¾ä\n");
-        printf("whileÑ­»·Óï¾ä\n");
+        fprintf(output_grammar_pointer,"whileå¾ªç¯è¯­å¥\n");
+        printf("whileå¾ªç¯è¯­å¥\n");
         statement();
         string elsestr;
+        string whilestr2;
 		if (symbol0 == WHILESY&&symbol1 == LPARSY){
-			read(); read(); condition(0,whilestr,elsestr);
+			read(); read();
+			whilestr2=whilelabel.top();
+			whilelabel.pop();
+			condition(0,whilestr2,elsestr);
 			if (symbol0 == RPARSY){ read();}
 			else{ error(23); }
 		}
@@ -1069,14 +1075,14 @@ void constant(){
 	else{ error(24); }
 }
 void switchstate(){//default
-    fprintf(output_grammar_pointer,"ÕâÊÇswitch-caseÓï¾ä\n");
-    printf("ÕâÊÇswitch-caseÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯switch-caseè¯­å¥\n");
+    printf("è¿™æ˜¯switch-caseè¯­å¥\n");
     string expname;
 	//char *casevar=NULL;
 	int expt=0;
 	string str;
 	newlab();
-	str=newlabel;//ÉèÖÃ±êÇ©
+	str=newlabel;//è®¾ç½®æ ‡ç­¾
 	defaultlabel.push(str);
 	if(symbol0==LPARSY){
         //cout<<symbol0<<" "<<symbol1<<" "<<symbol2<<endl;//32 8 33(i)
@@ -1124,12 +1130,12 @@ void casestate(string &casevar){
 		if(symbol0==CHARCON){
             str=casev;
 			insert(str,"case",1,val,-1);
-			fprintf(output_midcoder_pointer,"LODCASE %s %s 1\n",casev.c_str(),v0.c_str());//v0:case ºó¸úµÄ×Ö·û  1:type
-			fprintf(output_midcoder_pointer,"!= %s %s %s\n",casevar.c_str(),casev.c_str(),newlabel.c_str());//²»·ûºÏÌõ¼şÌø×ªµ½str,ÏÂÒ»¸öcase»òÕßÊÇdefault
+			fprintf(output_midcoder_pointer,"LODCASE %s %s 1\n",casev.c_str(),v0.c_str());//v0:case åè·Ÿçš„å­—ç¬¦  1:type
+			fprintf(output_midcoder_pointer,"!= %s %s %s\n",casevar.c_str(),casev.c_str(),newlabel.c_str());//ä¸ç¬¦åˆæ¡ä»¶è·³è½¬åˆ°str,ä¸‹ä¸€ä¸ªcaseæˆ–è€…æ˜¯default
 			read();
 		}
 		else if(symbol0==PLUSSY||symbol0==MINUSSY||symbol0==INTCON){
-			integer();//val ¸³Öµ
+			integer();//val èµ‹å€¼
 			str=casev;
 			insert(str,"case",0,val,-1);
 			fprintf(output_midcoder_pointer,"LODCASE %s %s 0\n",casev.c_str(),val.c_str());
@@ -1141,13 +1147,13 @@ void casestate(string &casevar){
 		}
 		if (symbol0 == COLONSY){
 			read();
-			statement();//¶ÁÈ¡ÏÂÒ»¸ö×Ö·û
+			statement();//è¯»å–ä¸‹ä¸€ä¸ªå­—ç¬¦
 		}
 		else{ error(30); }
 	}
 	else{error(30); }
 }
-void defaultstate(){//jne , , ,labelÖ¸Áî£¨²»µÈ£¬ÔòÌøµ½ÏÂÒ»¸öcase»òÕßdefaultÎ»ÖÃ£©   Éú³ÉÓï¾äÖ¸Áî  jump default_label_final Ö´ĞĞ¸Ã·ÖÖ§ºó£¬Ö±½ÓÌøµ½default½áÊøµÄÎ»ÖÃ
+void defaultstate(){//jne , , ,labelæŒ‡ä»¤ï¼ˆä¸ç­‰ï¼Œåˆ™è·³åˆ°ä¸‹ä¸€ä¸ªcaseæˆ–è€…defaultä½ç½®ï¼‰   ç”Ÿæˆè¯­å¥æŒ‡ä»¤  jump default_label_final æ‰§è¡Œè¯¥åˆ†æ”¯åï¼Œç›´æ¥è·³åˆ°defaultç»“æŸçš„ä½ç½®
     read();
     if(symbol0==COLONSY){
         read();
@@ -1158,8 +1164,8 @@ void defaultstate(){//jne , , ,labelÖ¸Áî£¨²»µÈ£¬ÔòÌøµ½ÏÂÒ»¸öcase»òÕßdefaultÎ»ÖÃ£
     else error(31);
 }
 void Rfcallstate(string &name,int *type){
-    fprintf(output_grammar_pointer,"ÕâÊÇÓĞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä\n");
-    printf("ÓĞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯æœ‰è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥\n");
+    printf("æœ‰è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥\n");
     string str;
     string s;
     //cout<<token<<" "<<ch<<" "<<symbol0<<endl;
@@ -1169,8 +1175,8 @@ void Rfcallstate(string &name,int *type){
         s=name;
         *type=getfunctype(str);
         if(*type==-1)error(41);
-        insert(s,"call",*type,"",-2);//µ÷ÓÃÀàĞÍ
-		if (symbol2 != RPARSY){ read(); read();Vparatable(str); }//Öµ²ÎÊı±í
+        insert(s,"call",*type,"",-2);//è°ƒç”¨ç±»å‹
+		if (symbol2 != RPARSY){ read(); read();Vparatable(str); }//å€¼å‚æ•°è¡¨
 		else{error(32);}
 		if (symbol0 == RPARSY){
             read();
@@ -1195,8 +1201,8 @@ void Rfcallstate(string &name,int *type){
 	}
 }
 void Ufcallstate(){
-    fprintf(output_grammar_pointer,"ÕâÊÇÎŞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä\n");
-    printf("ÎŞ·µ»ØÖµº¯Êıµ÷ÓÃÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯æ— è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥\n");
+    printf("æ— è¿”å›å€¼å‡½æ•°è°ƒç”¨è¯­å¥\n");
     string str,str1;
     int hasvoid=0;
 	if ( symbol0 == IDSY && symbol1 == LPARSY){
@@ -1210,7 +1216,7 @@ void Ufcallstate(){
             read();
             Vparatable(str);
         }
-		else{ error(33);}//Öµ²ÎÊı±íÎª¿Õ
+		else{ error(33);}//å€¼å‚æ•°è¡¨ä¸ºç©º
 		if (symbol0 == RPARSY){
             read();
             fprintf(output_midcoder_pointer,"JUMP %s\n",str.c_str());
@@ -1231,60 +1237,60 @@ void Ufcallstate(){
 	else{ error(33); }
 }
 void Vparatable(string paraname){
-    fprintf(output_grammar_pointer,"ÕâÊÇÖµ²ÎÊı±í\n");
-    printf("Öµ²ÎÊı±í\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯å€¼å‚æ•°è¡¨\n");
+    printf("å€¼å‚æ•°è¡¨\n");
     string  expname;
     int exptype=0;
     int paranums=0;
     int truepara=0;
     int formpara=0;
     exp(expname,&exptype);
-    fprintf(output_midcoder_pointer,"Vpara %s %s %d\n",expname.c_str(),paraname.c_str(),paranums);//²ÎÊıÃû  ËùÊôº¯ÊıÃû   ²ÎÊı´ÎĞò
-    paranums++;//²ÎÊıÀàĞÍ¼ì²é
+    fprintf(output_midcoder_pointer,"Vpara %s %s %d\n",expname.c_str(),paraname.c_str(),paranums);//å‚æ•°å  æ‰€å±å‡½æ•°å   å‚æ•°æ¬¡åº
+    paranums++;//å‚æ•°ç±»å‹æ£€æŸ¥
     truepara=getvartype2(expname,LVL);
     formpara=getfuncpara(paraname,paranums);
     if(truepara!=formpara){
-        printf("%sº¯Êı²ÎÊıÀàĞÍ²»Æ¥Åä\n",paraname.c_str());
-        fprintf(output_error,"%sº¯Êı²ÎÊıÀàĞÍ²»Æ¥Åä\n",paraname.c_str());
+        printf("%så‡½æ•°å‚æ•°ç±»å‹ä¸åŒ¹é…\n",paraname.c_str());
+        fprintf(output_error,"%så‡½æ•°å‚æ•°ç±»å‹ä¸åŒ¹é…\n",paraname.c_str());
     }
 	while (symbol0 == COMMASY){
 		read();
 		exp(expname,&exptype);
-		fprintf(output_midcoder_pointer,"Vpara %s %s %d\n",expname.c_str(),paraname.c_str(),paranums);//²ÎÊıÃû  ËùÊôº¯ÊıÃû   ²ÎÊı´ÎĞò
+		fprintf(output_midcoder_pointer,"Vpara %s %s %d\n",expname.c_str(),paraname.c_str(),paranums);//å‚æ•°å  æ‰€å±å‡½æ•°å   å‚æ•°æ¬¡åº
         paranums++;
         truepara=getvartype2(expname,LVL);
         formpara=getfuncpara(paraname,paranums);
         if(truepara!=formpara){
-            printf("%sº¯Êı²ÎÊıÀàĞÍ²»Æ¥Åä\n",paraname.c_str());
-            fprintf(output_error,"%sº¯Êı²ÎÊıÀàĞÍ²»Æ¥Åä\n",paraname.c_str());
+            printf("%så‡½æ•°å‚æ•°ç±»å‹ä¸åŒ¹é…\n",paraname.c_str());
+            fprintf(output_error,"%så‡½æ•°å‚æ•°ç±»å‹ä¸åŒ¹é…\n",paraname.c_str());
         }
 	}
 	//printf("%d %d\n",getparan2(paraname),paranums);
 	if(paranums!=getparan2(paraname)){
-        printf("²ÎÊı¸öÊı³ö´í\n");
-        fprintf(output_error,"²ÎÊı¸öÊı³ö´í\n");
+        printf("å‚æ•°ä¸ªæ•°å‡ºé”™\n");
+        fprintf(output_error,"å‚æ•°ä¸ªæ•°å‡ºé”™\n");
 	}
 }
 void printfstate(){
-    fprintf(output_grammar_pointer,"ÕâÊÇÊä³öÓï¾ä\n");
-    printf("Êä³öÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯è¾“å‡ºè¯­å¥\n");
+    printf("è¾“å‡ºè¯­å¥\n");
     string expname;
     int exptype=0;
     string str;
 	if (symbol0 == PRINTFSY&&symbol1 == LPARSY){
 		read(); read();
-		if (symbol0 == STRINGCON&&symbol1 == COMMASY){//×Ö·û´®£¬±í´ïÊ½
+		if (symbol0 == STRINGCON&&symbol1 == COMMASY){//å­—ç¬¦ä¸²ï¼Œè¡¨è¾¾å¼
             str=newstrlable();
             fprintf(output_midcoder_pointer,"PRINTFSTR %s\n",str.c_str());
             strcount++;
-            strlabelarr.push_back(v0);//±£´æ×Ö·û´®Ò»Ò»¶ÔÓ¦µÄ  str[k]==stringk k>=0
+            strlabelarr.push_back(v0);//ä¿å­˜å­—ç¬¦ä¸²ä¸€ä¸€å¯¹åº”çš„  str[k]==stringk k>=0
 			read(); read();
 			exp(expname,&exptype);
 			if(expprintflag==false){
                 fprintf(output_midcoder_pointer,"PRINTFEXP %s\n",expname.c_str());
 			}
 			else{
-                fprintf(output_midcoder_pointer,"PRINTFEXPINT %s\n",expname.c_str());//ÔËËãÊ½
+                fprintf(output_midcoder_pointer,"PRINTFEXPINT %s\n",expname.c_str());//è¿ç®—å¼
 			}
 			if (symbol0 == RPARSY){ read();}
 			else{ error(33); }
@@ -1314,8 +1320,8 @@ void printfstate(){
 }
 
 void scanfstate(){
-    fprintf(output_grammar_pointer,"ÕâÊÇ¶ÁÓï¾ä\n");
-    printf("¶ÁÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯è¯»è¯­å¥\n");
+    printf("è¯»è¯­å¥\n");
     string str;
 	if (symbol0 == SCANFSY&&symbol1 == LPARSY){
 		read(); read();
@@ -1323,13 +1329,13 @@ void scanfstate(){
             str=strlwr2(v0);
             if(insymtable(str)==0)
                 error(40);
-            fprintf(output_midcoder_pointer,"SCANF %s %d\n",str.c_str(),LVL);//lvl±äÁ¿ËùÊô²ã´Î
+            fprintf(output_midcoder_pointer,"SCANF %s %d\n",str.c_str(),LVL);//lvlå˜é‡æ‰€å±å±‚æ¬¡
 			read();
 			while (symbol0 == COMMASY){
 				read();
 				if (symbol0 == IDSY){
 				    str=strlwr2(v0);
-				    if(insymtable(str)==0)//Î´ÉùÃ÷±¨´í
+				    if(insymtable(str)==0)//æœªå£°æ˜æŠ¥é”™
                         error(40);
                     fprintf(output_midcoder_pointer,"SCANF %s %d\n",str.c_str(),LVL);
 					read();
@@ -1344,8 +1350,8 @@ void scanfstate(){
 	else{ error(34); }
 }
 void returnstate(){
-    fprintf(output_grammar_pointer,"ÕâÊÇ·µ»ØÓï¾ä\n");
-    printf("·µ»ØÓï¾ä\n");
+    fprintf(output_grammar_pointer,"è¿™æ˜¯è¿”å›è¯­å¥\n");
+    printf("è¿”å›è¯­å¥\n");
     string expname;
     int exptype;
 	if (symbol0 == RETURNSY&&symbol1 == LPARSY){
@@ -1368,7 +1374,7 @@ void returnstate(){
     }
 	else{ error(35); }
 }
-/*int main(){//´æÔÚËÀÑ­»·  debug
+/*int main(){//å­˜åœ¨æ­»å¾ªç¯  debug
         ch=' ';
         input_file_pointer = fopen("test.txt","r");
         output_grammar_pointer = fopen("grammer.txt","w");
